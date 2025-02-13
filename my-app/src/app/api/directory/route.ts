@@ -13,13 +13,14 @@ export async function GET() {
 
     const result = await sql`
       SELECT 
-        ln.id,
-        ln.lang_name as language,
-        ln.wer_asr as "werAsr",
-        ln.bleu_nmt as "bleuNmt",
-        ln.chrf_nmt as "chrfNmt",
-        ln.has_tts as "hasTts"
-      FROM language_new ln
+        ln.lang_name AS language, 
+        CAST(nps.spbleu_spm_200 AS FLOAT) AS bleu_nmt, 
+        CAST(nps.chrf_plus AS FLOAT) AS chrf,
+        COALESCE(ln.tts, false) AS tts
+      FROM public.language_new ln
+      LEFT JOIN public.nmt_pairs_source nps 
+        ON ln.id = nps.source_lang_id
+      WHERE nps."Target" = 'eng_Latn'
       ORDER BY ln.lang_name ASC;
     `;
 

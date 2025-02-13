@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { use } from "react";
 import Link from "next/link";
 import TranslationPairs from "@/components/TranslationPairs";
+import ProgressBar from "@/components/ProgressBar";
 import { LanguageData } from "@/types";
 
 interface TabProps {
@@ -103,9 +104,30 @@ export default function LanguageDetails({
     { id: "pairs", label: "Translation Pairs" },
   ];
 
+  // Calculate progress based on available models and translation pairs
+  const calculateProgress = () => {
+    let score = 0;
+    const maxScore = 100;
+
+    // Base score for having coordinates
+    if (language.latitude && language.longitude) score += 10;
+
+    // Score for each available model
+    const availableModels = language.available_models?.filter(Boolean) || [];
+    score += availableModels.length * 15;
+
+    // Score for translation pairs
+    const translationPairCount = language.nmt_pair_count || 0;
+    score += Math.min(translationPairCount * 5, 40); // Cap at 40%
+
+    return Math.min(Math.round((score / maxScore) * 100), 100);
+  };
+
+  const progress = calculateProgress();
+
   return (
     <main className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-4">
         <h1 className="text-3xl font-bold text-white">{language.name || "Amharic"}</h1>
         <Link
           href="/"
@@ -113,6 +135,11 @@ export default function LanguageDetails({
         >
           ← Back to Map
         </Link>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="mb-6 w-full max-w-xl">
+        <ProgressBar progress={progress} />
       </div>
 
       <div className="border-b border-gray-700 mb-6">

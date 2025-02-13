@@ -3,12 +3,10 @@
 import { useState, useEffect } from 'react';
 
 interface Language {
-  id: number;
   language: string;
-  werAsr: number | null;
-  bleuNmt: number | null;
-  chrfNmt: number | null;
-  hasTts: boolean;
+  bleu_nmt: number | null;
+  chrf: number | null;
+  tts: boolean;
 }
 
 export default function DirectoryPage() {
@@ -27,8 +25,19 @@ export default function DirectoryPage() {
           throw new Error('Failed to fetch directory data');
         }
         const data = await response.json();
-        setLanguages(data);
+        console.log('API Response:', data);
+        
+        // Transform the data to ensure numbers are properly handled
+        const transformedData = data.map((item: any) => ({
+          language: item.language,
+          bleu_nmt: typeof item.bleu_nmt === 'string' ? parseFloat(item.bleu_nmt) : item.bleu_nmt,
+          chrf: typeof item.chrf === 'string' ? parseFloat(item.chrf) : item.chrf,
+          tts: Boolean(item.tts)
+        }));
+        
+        setLanguages(transformedData);
       } catch (err) {
+        console.error('Error details:', err);
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setLoading(false);
@@ -44,17 +53,14 @@ export default function DirectoryPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="container mx-auto p-4">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Language Directory</h1>
+          <h1 className="text-3xl font-bold text-white">Language Directory</h1>
         </div>
-        <div className="animate-pulse">
-          <div className="h-10 bg-gray-200 rounded mb-4"></div>
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-8 bg-gray-200 rounded"></div>
-            ))}
-          </div>
+        <div className="animate-pulse space-y-4">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-12 bg-gray-800 rounded"></div>
+          ))}
         </div>
       </div>
     );
@@ -62,71 +68,54 @@ export default function DirectoryPage() {
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-600">{error}</p>
+      <div className="container mx-auto p-4">
+        <div className="bg-red-900/50 border border-red-700 rounded-lg p-4">
+          <p className="text-red-200">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Language Directory</h1>
+        <h1 className="text-3xl font-bold text-white">Language Directory</h1>
         <div className="relative">
           <input
             type="text"
-            placeholder="Search language..."
-            className="pl-3 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Search languages..."
+            className="w-64 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <span className="absolute right-3 top-2.5 text-gray-400">
-            🔍
-          </span>
         </div>
       </div>
 
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+      <div className="bg-gray-900/50 backdrop-blur-sm rounded-lg overflow-hidden border border-gray-800">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-800">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                  Language
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                  WER (ASR)
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                  BLEU (NMT)
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                  ChrF++ (NMT)
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                  TTS
-                </th>
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-800">
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">Language</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">BLEU (NMT)</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">ChrF++</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">TTS</th>
               </tr>
             </thead>
-            <tbody className="bg-gray-900 divide-y divide-gray-700">
-              {filteredLanguages.map((lang) => (
-                <tr key={lang.id} className="hover:bg-gray-800">
+            <tbody className="divide-y divide-gray-800">
+              {filteredLanguages.map((lang, index) => (
+                <tr key={index} className="hover:bg-gray-800/50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     {lang.language}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {lang.werAsr !== null ? lang.werAsr.toFixed(2) : 'N/A'}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                    {typeof lang.bleu_nmt === 'number' && !isNaN(lang.bleu_nmt) ? lang.bleu_nmt.toFixed(2) : 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {lang.bleuNmt !== null ? lang.bleuNmt.toFixed(2) : 'N/A'}
+                    {typeof lang.chrf === 'number' && !isNaN(lang.chrf) ? lang.chrf.toFixed(2) : 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {lang.chrfNmt !== null ? lang.chrfNmt.toFixed(2) : 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {lang.hasTts ? 'Yes' : 'No'}
+                    {lang.tts ? 'Yes' : 'No'}
                   </td>
                 </tr>
               ))}
