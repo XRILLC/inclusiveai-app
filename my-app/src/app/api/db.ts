@@ -8,7 +8,7 @@ const sql = postgres({
   password: process.env.PGPASSWORD,
 });
 
-export async function query(text: string, params?: any[]) {
+export async function query(text: string, params?: (string | number | boolean | Date)[]) {
   const result = await sql.unsafe(text, params);
   return result;
 }

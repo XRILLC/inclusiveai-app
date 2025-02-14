@@ -28,7 +28,7 @@ export default function DirectoryPage() {
         console.log('API Response:', data);
         
         // Transform the data to match our interface
-        const transformedData = data.map((item: any) => ({
+        const transformedData = data.map((item: { language: string; 'bleu (NMT)': string | null; 'ChrF++': string | null; tts: boolean }) => ({
           language: item.language,
           'bleu (NMT)': item['bleu (NMT)'],
           'ChrF++': item['ChrF++'],

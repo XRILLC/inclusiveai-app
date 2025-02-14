@@ -15,10 +15,9 @@ import { TranslationPair } from '@/types';
 
 interface Props {
   languageId: string;
-  languageName: string;
 }
 
-export default function TranslationPairs({ languageId, languageName }: Props) {
+export default function TranslationPairs({ languageId }: Props) {
   const [pairs, setPairs] = useState<TranslationPair[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +33,7 @@ export default function TranslationPairs({ languageId, languageName }: Props) {
         }
         const data = await response.json();
         // Convert string scores to numbers if needed
-        const processedData = data.map((pair: any) => ({
+        const processedData = data.map((pair: { chrf_score: string | number; bleu_score: string | number }) => ({
           ...pair,
           chrf_score: Number(pair.chrf_score),
           bleu_score: Number(pair.bleu_score)
