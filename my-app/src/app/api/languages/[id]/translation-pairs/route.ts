@@ -30,8 +30,10 @@ export async function GET(
       SELECT 
         nps.chrf_plus as chrf_score,
         nps.spbleu_spm_200 as bleu_score,
-        source_lang.language_name AS source_language,
-        target_lang.language_name AS target_language,
+        source_lang.language_name AS source_lang_name,
+        target_lang.language_name AS target_lang_name,
+        source_lang.id AS source_lang_id,
+        target_lang.id AS target_lang_id,
         CASE 
           WHEN source_lang.id = $1 THEN 'Source'
           ELSE 'Target'
