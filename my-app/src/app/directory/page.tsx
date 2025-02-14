@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 
 interface Language {
   language: string;
-  bleu_nmt: number | null;
-  chrf: number | null;
+  'bleu (NMT)': string | null;
+  'ChrF++': string | null;
   tts: boolean;
 }
 
@@ -20,18 +20,18 @@ export default function DirectoryPage() {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch('/api/directory');
+        const response = await fetch('/api/azure-directory');
         if (!response.ok) {
           throw new Error('Failed to fetch directory data');
         }
         const data = await response.json();
         console.log('API Response:', data);
         
-        // Transform the data to ensure numbers are properly handled
+        // Transform the data to match our interface
         const transformedData = data.map((item: any) => ({
           language: item.language,
-          bleu_nmt: typeof item.bleu_nmt === 'string' ? parseFloat(item.bleu_nmt) : item.bleu_nmt,
-          chrf: typeof item.chrf === 'string' ? parseFloat(item.chrf) : item.chrf,
+          'bleu (NMT)': item['bleu (NMT)'],
+          'ChrF++': item['ChrF++'],
           tts: Boolean(item.tts)
         }));
         
@@ -109,10 +109,10 @@ export default function DirectoryPage() {
                     {lang.language}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                    {typeof lang.bleu_nmt === 'number' && !isNaN(lang.bleu_nmt) ? lang.bleu_nmt.toFixed(2) : 'N/A'}
+                    {lang['bleu (NMT)'] || 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {typeof lang.chrf === 'number' && !isNaN(lang.chrf) ? lang.chrf.toFixed(2) : 'N/A'}
+                    {lang['ChrF++'] || 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     {lang.tts ? 'Yes' : 'No'}
