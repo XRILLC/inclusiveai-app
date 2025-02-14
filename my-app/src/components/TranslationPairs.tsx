@@ -162,10 +162,10 @@ export default function TranslationPairs({ languageId }: Props) {
                   {formatScore(pair.bleu_score)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {pair.source_language}
+                  {pair.source_lang_name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {pair.target_language}
+                  {pair.target_lang_name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {pair.role}
