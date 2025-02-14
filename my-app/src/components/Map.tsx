@@ -120,7 +120,7 @@ export default function Map({ languages, selectedModels }: MapProps) {
                 <h4 class="text-lg font-semibold mb-2">Translation Pair</h4>
                 <p class="mb-2">
                   <strong>Source:</strong> ${language.name}<br>
-                  <strong>Target:</strong> ${language.connected_languages[index].name}
+                  <strong>Target:</strong> ${language.connected_languages?.[index]?.name || 'Unknown'}
                 </p>
               </div>
             `;
