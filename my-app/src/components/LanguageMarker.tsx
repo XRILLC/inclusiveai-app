@@ -112,8 +112,8 @@ export function LanguageMarker({ language, selectedModels }: LanguageMarkerProps
             <div className="mb-2">
               <strong>Connected Languages:</strong>
               <div className="mt-1 max-h-[100px] overflow-y-auto">
-                {language.connected_languages.split(", ").map((lang) => (
-                  <div key={lang}>• {lang}</div>
+                {language.connected_languages.map((lang) => (
+                  <div key={lang.id}>• {lang.name}</div>
                 ))}
               </div>
             </div>
