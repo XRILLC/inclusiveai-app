@@ -76,7 +76,7 @@ export default function TranslationPairs({ languageId }: Props) {
 
   // Prepare data for the chart, ensuring numbers
   const chartData = pairs.map(pair => ({
-    target_language: pair.target_language,
+    target_language: pair.target_lang_name,
     chrf_score: Number(pair.chrf_score) || 0,
     bleu_score: Number(pair.bleu_score) || 0
   }));
