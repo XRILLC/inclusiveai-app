@@ -6,8 +6,10 @@ import { SimpleProgressBar } from '@/components/SimpleProgressBar';
 
 interface LanguagePageProps {
   params: {
+    id: string;
     slug: string;
   };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
 export default function LanguagePage({ params }: LanguagePageProps) {
