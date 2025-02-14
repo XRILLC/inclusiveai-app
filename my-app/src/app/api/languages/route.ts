@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { loadLanguageData } from '../db';
+import { loadLanguageData } from '../db-azure';
 
 export async function GET() {
   try {
