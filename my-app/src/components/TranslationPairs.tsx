@@ -147,9 +147,7 @@ export default function TranslationPairs({ languageId }: Props) {
               <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Target Language
               </th>
-              <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Role
-              </th>
+
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -167,9 +165,7 @@ export default function TranslationPairs({ languageId }: Props) {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {pair.target_lang_name}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {pair.role}
-                </td>
+
               </tr>
             ))}
           </tbody>
