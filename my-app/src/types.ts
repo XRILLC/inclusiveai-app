@@ -19,6 +19,7 @@ export interface LanguageData {
   longitude: number;
   available_models: ModelType[];
   nmt_pair_count: number;
+  connected_languages?: { name: string; id: string }[];
 }
 
 export interface TranslationPair {
