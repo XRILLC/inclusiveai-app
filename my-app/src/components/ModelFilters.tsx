@@ -11,7 +11,7 @@ export function ModelFilters({ onFilterChange }: ModelFiltersProps) {
     { id: "TTS", label: "TTS", color: "green" },
   ];
 
-  const handleCheckboxChange = (_e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCheckboxChange = () => {
     const selectedModels = modelTypes
       .filter((model) => {
         const element = document.getElementById(model.id) as HTMLInputElement;
