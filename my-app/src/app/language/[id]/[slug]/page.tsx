@@ -1,19 +1,18 @@
-"use client";
-
 import React from 'react';
 import Link from 'next/link';
 import { SimpleProgressBar } from '@/components/SimpleProgressBar';
 
 interface LanguagePageProps {
-  params: {
+  params: Promise<{
     id: string;
     slug: string;
-  };
+  }>;
   searchParams: { [key: string]: string | string[] | undefined };
 }
 
-export default function LanguagePage({ params }: LanguagePageProps) {
-  const languageName = decodeURIComponent(params.slug);
+export default async function LanguagePage({ params }: LanguagePageProps) {
+  const { slug } = await params;
+  const languageName = decodeURIComponent(slug);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white relative">
