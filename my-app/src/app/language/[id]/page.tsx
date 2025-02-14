@@ -237,7 +237,7 @@ export default function LanguageDetails({
       )}
 
       {activeTab === "pairs" && (
-        <TranslationPairs languageId={resolvedParams.id} languageName={language.name} />
+        <TranslationPairs languageId={resolvedParams.id} />
       )}
     </main>
   );
