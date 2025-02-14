@@ -20,6 +20,7 @@ export interface LanguageData {
   available_models: ModelType[];
   nmt_pair_count: number;
   connected_languages?: { name: string; id: string }[];
+  connected_coords?: [number, number][];
 }
 
 export interface TranslationPair {

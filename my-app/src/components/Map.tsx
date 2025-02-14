@@ -6,11 +6,11 @@ import 'leaflet/dist/leaflet.css';
 import { LanguageData } from '@/types';
 import { useRouter } from 'next/navigation';
 
-const MODEL_COLORS = {
+const MODEL_COLORS: Record<string, string> = {
   ASR: '#FF4B4B',
   NMT: '#4CAF50',
   TTS: '#2196F3'
-} as const;
+};
 
 interface MapProps {
   languages: LanguageData[];
@@ -103,15 +103,7 @@ export default function Map({ languages, selectedModels }: MapProps) {
 
       // If language has NMT pairs and connected languages, draw connections
       if (language.connected_languages && language.connected_coords) {
-        const connectedLanguages = Array.isArray(language.connected_languages) 
-          ? language.connected_languages 
-          : language.connected_languages.split(',');
-
-        const connectedCoords = Array.isArray(language.connected_coords) 
-          ? language.connected_coords 
-          : JSON.parse(language.connected_coords);
-
-        connectedCoords.forEach((coords: number[], index: number) => {
+        language.connected_coords.forEach((coords, index) => {
           if (coords && coords.length === 2) {
             const line = L.polyline(
               [[language.latitude, language.longitude], coords],
@@ -128,7 +120,7 @@ export default function Map({ languages, selectedModels }: MapProps) {
                 <h4 class="text-lg font-semibold mb-2">Translation Pair</h4>
                 <p class="mb-2">
                   <strong>Source:</strong> ${language.name}<br>
-                  <strong>Target:</strong> ${connectedLanguages[index]}
+                  <strong>Target:</strong> ${language.connected_languages[index].name}
                 </p>
               </div>
             `;
