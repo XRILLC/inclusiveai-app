@@ -3,17 +3,20 @@ import postgres from 'postgres';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const sql = postgres({
-      host: process.env.PGHOST,
-      port: parseInt(process.env.PGPORT || '5432'),
-      database: process.env.PGDATABASE,
-      username: process.env.PGUSER,
-      password: process.env.PGPASSWORD,
+      host: process.env.AZURE_PGHOST,
+      port: parseInt(process.env.AZURE_PGPORT || '5432'),
+      database: process.env.AZURE_PGDATABASE,
+      username: process.env.AZURE_PGUSER,
+      password: process.env.AZURE_PGPASSWORD,
+      ssl: {
+        rejectUnauthorized: false
+      }
     });
 
     const result = await sql`

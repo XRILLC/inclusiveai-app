@@ -3,11 +3,11 @@ import postgres from 'postgres';
 
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { params } = context;
+  const { id } = await params;
   try {
-    const { id } = params;
+
 
     const sql = postgres({
       host: process.env.AZURE_PGHOST,
