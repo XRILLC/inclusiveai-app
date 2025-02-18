@@ -32,11 +32,8 @@ export async function GET(
         ln.asr,
         ln.nmt,
         ln.tts,
-        ln.asr_url,
-        ln.nmt_url,
-        ln.tts_url,
-        ST_Y(ln.coordinates::geometry) as latitude,
-        ST_X(ln.coordinates::geometry) as longitude,
+        ROUND(CAST(ST_Y(ln.coordinates::geometry) as numeric), 6) as latitude,
+        ROUND(CAST(ST_X(ln.coordinates::geometry) as numeric), 6) as longitude,
         array_remove(ARRAY[
           CASE WHEN ln.asr THEN 'ASR' ELSE NULL END,
           CASE WHEN ln.nmt THEN 'NMT' ELSE NULL END,
