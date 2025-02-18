@@ -47,31 +47,31 @@ export async function loadLanguageData() {
           AND target_coords[2] BETWEEN -180 AND 180
         ) as connected_coords,
         array_agg(DISTINCT target_id) as connected_lang_ids,
-        array_agg(DISTINCT chrf_plus) as chrf_scores,
-        array_agg(DISTINCT spbleu_spm_200) as bleu_scores
+        array_agg(DISTINCT chrf_plus) FILTER (WHERE chrf_plus IS NOT NULL) as chrf_scores,
+        array_agg(DISTINCT spbleu_spm_200) FILTER (WHERE spbleu_spm_200 IS NOT NULL) as bleu_scores
       FROM ordered_pairs
       GROUP BY source_id
     )
     SELECT 
       l.id,
       l.language_name as name,
-      l.iso_639_3 as iso_code,
-      ST_Y(l.coordinates::geometry) as latitude,
-      ST_X(l.coordinates::geometry) as longitude,
-      ARRAY[
-        CASE WHEN l.asr THEN 'ASR' END,
-        CASE WHEN l.nmt THEN 'NMT' END,
-        CASE WHEN l.tts THEN 'TTS' END
-      ] as available_models,
-      (SELECT COUNT(*)
+      COALESCE(l.iso_639_3, '') as iso_code,
+      ROUND(CAST(ST_Y(l.coordinates::geometry) as numeric), 6) as latitude,
+      ROUND(CAST(ST_X(l.coordinates::geometry) as numeric), 6) as longitude,
+      ARRAY_REMOVE(ARRAY[
+        CASE WHEN l.asr IS TRUE THEN 'ASR' END,
+        CASE WHEN l.nmt IS TRUE THEN 'NMT' END,
+        CASE WHEN l.tts IS TRUE THEN 'TTS' END
+      ], NULL) as available_models,
+      COALESCE((SELECT COUNT(*)
        FROM nmt_pairs_source nps
-       WHERE nps.source_lang_id = l.id OR nps.target_lang_id = l.id) as nmt_pair_count,
+       WHERE nps.source_lang_id = l.id OR nps.target_lang_id = l.id), 0) as nmt_pair_count,
       COALESCE(lc.connected_languages, ARRAY[]::text[]) as connected_languages,
       COALESCE(lc.connected_coords, ARRAY[]::float[][]) as connected_coords,
       COALESCE(lc.connected_lang_ids, ARRAY[]::integer[]) as connected_lang_ids,
       COALESCE(lc.chrf_scores, ARRAY[]::float[]) as chrf_scores,
       COALESCE(lc.bleu_scores, ARRAY[]::float[]) as bleu_scores,
-      CASE WHEN lc.lang_id IS NOT NULL THEN TRUE ELSE FALSE END as has_nmt_pair
+      COALESCE(CASE WHEN lc.lang_id IS NOT NULL THEN TRUE ELSE FALSE END, FALSE) as has_nmt_pair
     FROM language_new l
     LEFT JOIN lang_connections lc ON l.id = lc.lang_id
     WHERE l.coordinates IS NOT NULL
@@ -81,6 +81,11 @@ export async function loadLanguageData() {
     ORDER BY l.language_name
   `;
 
-  const result = await sql.unsafe(queryText);
-  return result;
+  try {
+    const result = await sql.unsafe(queryText);
+    return result;
+  } catch (error) {
+    console.error('Database query error:', error);
+    throw new Error('Failed to load language data from database');
+  }
 }
