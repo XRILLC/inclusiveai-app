@@ -78,8 +78,12 @@ export default function DirectoryPage() {
 
   return (
     <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
+      <div className="space-y-4 mb-6">
         <h1 className="text-3xl font-bold text-white">Language Directory</h1>
+        <p className="text-lg text-gray-300">
+          This page shows the best known machine translation scores when paired with English 
+          as well as the best ASR score per language.
+        </p>
         <div className="relative">
           <input
             type="text"
