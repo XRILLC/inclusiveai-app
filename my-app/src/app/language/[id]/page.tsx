@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { use } from "react";
 import Link from "next/link";
-import TranslationPairs from "@/components/TranslationPairs";
-import ProgressBar from "@/components/ProgressBar";
+import TranslationPairs from "../../../components/TranslationPairs";
+import ProgressBar from "../../../components/ProgressBar";
 import { LanguageData } from "@/types";
 
 interface TabProps {

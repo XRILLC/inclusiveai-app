@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { SimpleProgressBar } from '@/components/SimpleProgressBar';
+import { SimpleProgressBar } from '../../../../components/SimpleProgressBar';
 
 interface LanguagePageProps {
   params: Promise<{

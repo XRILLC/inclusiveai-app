@@ -23,24 +23,26 @@ export async function GET(
       SELECT 
         ln.id,
         ln.language_name as name,
-        ln.iso_code,
+        ln.iso_639_3 as iso_code,
         ln.glottocode,
         lf.name as family_name,
         lf.id as family_id,
         ls.name as subfamily_name,
         ls.id as subfamily_id,
-        ln.latitude,
-        ln.longitude,
-        ln.asr_url IS NOT NULL as asr,
-        ln.nmt_url IS NOT NULL as nmt,
-        ln.tts_url IS NOT NULL as tts,
-        ln.asr_url,
-        ln.nmt_url,
-        ln.tts_url
+        ln.asr,
+        ln.nmt,
+        ln.tts,
+        ROUND(CAST(ST_Y(ln.coordinates::geometry) as numeric), 6) as latitude,
+        ROUND(CAST(ST_X(ln.coordinates::geometry) as numeric), 6) as longitude,
+        array_remove(ARRAY[
+          CASE WHEN ln.asr THEN 'ASR' ELSE NULL END,
+          CASE WHEN ln.nmt THEN 'NMT' ELSE NULL END,
+          CASE WHEN ln.tts THEN 'TTS' ELSE NULL END
+        ], NULL) as available_models
       FROM language_new ln
-      LEFT JOIN language_family lf ON ln.family_id = lf.id
-      LEFT JOIN language_subfamily ls ON ln.subfamily_id = ls.id
-      WHERE ln.subfamily_id = ${parseInt(id)}
+      LEFT JOIN language_family lf ON ln.language_family_id = lf.id
+      LEFT JOIN language_subfamily ls ON ln.language_subfamily_id = ls.id
+      WHERE ln.language_subfamily_id = ${parseInt(id)}
       ORDER BY ln.language_name;
     `;
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { BridgingProgressBar } from '@/components/BridgingProgressBar';
+import { BridgingProgressBar } from '../../../components/BridgingProgressBar';
 
 interface LanguageDetails {
   id: number;
@@ -10,7 +10,9 @@ interface LanguageDetails {
   iso_code: string;
   glottocode: string;
   family_name: string;
+  family_id: number;
   subfamily_name: string;
+  subfamily_id: number;
   available_models: string[];
   nmt_pair_count: number;
   latitude: number;
@@ -20,7 +22,7 @@ interface LanguageDetails {
   tts: boolean;
 }
 
-export default function LanguageDetailsPage({ params }: { params: { id: string } }) {
+export default function LanguageDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const [language, setLanguage] = useState<LanguageDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +30,8 @@ export default function LanguageDetailsPage({ params }: { params: { id: string }
   useEffect(() => {
     const fetchLanguageDetails = async () => {
       try {
-        const response = await fetch(`/api/languages/${params.id}`);
+        const resolvedParams = await params;
+        const response = await fetch(`/api/languages/${resolvedParams.id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch language details');
         }
@@ -42,7 +45,7 @@ export default function LanguageDetailsPage({ params }: { params: { id: string }
     };
 
     fetchLanguageDetails();
-  }, [params.id]);
+  }, [params]);
 
   if (loading) {
     return (
@@ -100,11 +103,29 @@ export default function LanguageDetailsPage({ params }: { params: { id: string }
               </div>
               <div>
                 <dt className="text-sm text-gray-500">Language Family</dt>
-                <dd className="text-gray-900">{language.family_name || 'N/A'}</dd>
+                <dd className="text-gray-900">
+                  {language.family_name ? (
+                    <Link 
+                      href={`/family/${language.family_id}`}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      {language.family_name}
+                    </Link>
+                  ) : 'N/A'}
+                </dd>
               </div>
               <div>
                 <dt className="text-sm text-gray-500">Subfamily</dt>
-                <dd className="text-gray-900">{language.subfamily_name || 'N/A'}</dd>
+                <dd className="text-gray-900">
+                  {language.subfamily_name ? (
+                    <Link 
+                      href={`/subfamily/${language.subfamily_id}`}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      {language.subfamily_name}
+                    </Link>
+                  ) : 'N/A'}
+                </dd>
               </div>
             </dl>
           </div>

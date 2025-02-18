@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { Stats } from "@/components/Stats";
-import { ModelFilters } from "@/components/ModelFilters";
-import { BridgingProgressBar } from "@/components/BridgingProgressBar";
+import { Stats } from "../components/Stats";
+import { ModelFilters } from "../components/ModelFilters";
+import { BridgingProgressBar } from "../components/BridgingProgressBar";
 import { LanguageData } from "@/types";
 
-const Map = dynamic(() => import("@/components/Map"), {
+const Map = dynamic(() => import("../components/Map"), {
   ssr: false,
 });
 
