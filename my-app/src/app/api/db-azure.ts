@@ -16,74 +16,48 @@ export async function query(text: string, params?: (string | number | boolean | 
   return result;
 }
 
-export async function loadLanguageData() {
+interface Language {
+  id: number;
+  language_name: string;
+  coordinates: string;
+  asr: boolean;
+  nmt: boolean;
+  tts: boolean;
+  latitude: number;
+  longitude: number;
+}
+
+export async function loadLanguageData(): Promise<Language[]> {
   const queryText = `
-    WITH ordered_pairs AS (
-      SELECT 
-        l1.id as source_id,
-        l2.language_name as target_name,
-        l2.id as target_id,
-        ARRAY[
-          ST_Y(l2.coordinates::geometry),
-          ST_X(l2.coordinates::geometry)
-        ]::float[] as target_coords,
-        nps.chrf_plus,
-        nps.spbleu_spm_200
-      FROM language_new l1
-      JOIN nmt_pairs_source nps ON l1.id = nps.source_lang_id OR l1.id = nps.target_lang_id
-      JOIN language_new l2 ON 
-        (nps.source_lang_id = l2.id OR nps.target_lang_id = l2.id) AND
-        l2.id != l1.id
-      WHERE l2.coordinates IS NOT NULL
-        AND ST_IsValid(l2.coordinates::geometry)
-      ORDER BY l2.language_name
-    ),
-    lang_connections AS (
-      SELECT 
-        source_id as lang_id,
-        array_agg(DISTINCT target_name) as connected_languages,
-        array_agg(DISTINCT target_coords) FILTER (WHERE 
-          target_coords[1] BETWEEN -90 AND 90
-          AND target_coords[2] BETWEEN -180 AND 180
-        ) as connected_coords,
-        array_agg(DISTINCT target_id) as connected_lang_ids,
-        array_agg(DISTINCT chrf_plus) FILTER (WHERE chrf_plus IS NOT NULL) as chrf_scores,
-        array_agg(DISTINCT spbleu_spm_200) FILTER (WHERE spbleu_spm_200 IS NOT NULL) as bleu_scores
-      FROM ordered_pairs
-      GROUP BY source_id
-    )
     SELECT 
-      l.id,
-      l.language_name as name,
-      COALESCE(l.iso_639_3, '') as iso_code,
-      ROUND(CAST(ST_Y(l.coordinates::geometry) as numeric), 6) as latitude,
-      ROUND(CAST(ST_X(l.coordinates::geometry) as numeric), 6) as longitude,
-      ARRAY_REMOVE(ARRAY[
-        CASE WHEN l.asr IS TRUE THEN 'ASR' END,
-        CASE WHEN l.nmt IS TRUE THEN 'NMT' END,
-        CASE WHEN l.tts IS TRUE THEN 'TTS' END
-      ], NULL) as available_models,
-      COALESCE((SELECT COUNT(*)
-       FROM nmt_pairs_source nps
-       WHERE nps.source_lang_id = l.id OR nps.target_lang_id = l.id), 0) as nmt_pair_count,
-      COALESCE(lc.connected_languages, ARRAY[]::text[]) as connected_languages,
-      COALESCE(lc.connected_coords, ARRAY[]::float[][]) as connected_coords,
-      COALESCE(lc.connected_lang_ids, ARRAY[]::integer[]) as connected_lang_ids,
-      COALESCE(lc.chrf_scores, ARRAY[]::float[]) as chrf_scores,
-      COALESCE(lc.bleu_scores, ARRAY[]::float[]) as bleu_scores,
-      COALESCE(CASE WHEN lc.lang_id IS NOT NULL THEN TRUE ELSE FALSE END, FALSE) as has_nmt_pair
-    FROM language_new l
-    LEFT JOIN lang_connections lc ON l.id = lc.lang_id
-    WHERE l.coordinates IS NOT NULL
-      AND ST_IsValid(l.coordinates::geometry)
-      AND ST_X(l.coordinates::geometry) BETWEEN -180 AND 180
-      AND ST_Y(l.coordinates::geometry) BETWEEN -90 AND 90
-    ORDER BY l.language_name
+      id,
+      language_name,
+      coordinates,
+      asr,
+      nmt,
+      tts,
+      ROUND(CAST(ST_Y(coordinates::geometry) as numeric), 6) as latitude,
+      ROUND(CAST(ST_X(coordinates::geometry) as numeric), 6) as longitude
+    FROM language_new
+    WHERE coordinates IS NOT NULL
+      AND ST_IsValid(coordinates::geometry)
+      AND ST_X(coordinates::geometry) BETWEEN -180 AND 180
+      AND ST_Y(coordinates::geometry) BETWEEN -90 AND 90
+    ORDER BY language_name
   `;
 
   try {
     const result = await sql.unsafe(queryText);
-    return result;
+    return result.map(row => ({
+      id: Number(row.id),
+      language_name: String(row.language_name),
+      coordinates: String(row.coordinates),
+      asr: Boolean(row.asr),
+      nmt: Boolean(row.nmt),
+      tts: Boolean(row.tts),
+      latitude: Number(row.latitude),
+      longitude: Number(row.longitude)
+    })) as Language[];
   } catch (error) {
     console.error('Database query error:', error);
     throw new Error('Failed to load language data from database');
