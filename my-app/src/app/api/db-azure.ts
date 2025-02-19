@@ -53,10 +53,12 @@ export async function loadLanguageData(modelType?: string): Promise<Language[]> 
       SELECT 
         id,
         language_name,
+        iso_639_3,
         coordinates,
+        tts,
         asr,
         nmt,
-        tts,
+        nmt_type,
         ROUND(CAST(ST_Y(coordinates::geometry) as numeric), 6) as latitude,
         ROUND(CAST(ST_X(coordinates::geometry) as numeric), 6) as longitude
       FROM language_new
@@ -67,8 +69,14 @@ export async function loadLanguageData(modelType?: string): Promise<Language[]> 
     `;
 
     if (modelType) {
-      const modelColumn = modelType.toLowerCase();
-      queryText += ` AND ${modelColumn} = true`;
+      // For the Data category, show all languages with any model
+      if (modelType.toLowerCase() === 'all') {
+        queryText += ` AND (tts IS true OR asr IS true OR nmt IS true)`;
+      } else {
+        // For specific model types (ASR, NMT, TTS)
+        const modelColumn = modelType.toLowerCase();
+        queryText += ` AND ${modelColumn} = true`;
+      }
     }
 
     queryText += ` ORDER BY language_name`;
