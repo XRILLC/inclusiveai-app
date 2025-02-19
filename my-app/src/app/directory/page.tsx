@@ -119,7 +119,7 @@ export default function DirectoryPage() {
                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Language</th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-600 dark:text-gray-300">BLEU (NMT)</th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-600 dark:text-gray-300">ChrF++</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600 dark:text-gray-300">TTS</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-600 dark:text-gray-300">WER</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">

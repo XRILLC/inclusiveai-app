@@ -12,10 +12,10 @@ export function ModelFilters({ onFilterChange }: ModelFiltersProps) {
   const [activeTab, setActiveTab] = useState<string>("ASR");
   
   const modelTypes = [
-    { id: "all", label: "Data" },
-    { id: "ASR", label: "ASR Models" },
-    { id: "NMT", label: "NMT Models" },
-    { id: "TTS", label: "TTS Models" },
+    { id: "all", label: "Data", shortLabel: "Data" },
+    { id: "ASR", label: "ASR Models", shortLabel: "ASR" },
+    { id: "NMT", label: "NMT Models", shortLabel: "NMT" },
+    { id: "TTS", label: "TTS Models", shortLabel: "TTS" },
   ];
 
   const handleTabChange = (value: string) => {
@@ -54,7 +54,10 @@ export function ModelFilters({ onFilterChange }: ModelFiltersProps) {
                 ${model.id === 'TTS' ? 'from-sky-600 to-sky-800 group-data-[state=active]:from-sky-100 group-data-[state=active]:to-sky-200' : ''}
                 ${model.id === 'Data' ? 'from-gray-600 to-gray-800 group-data-[state=active]:from-gray-100 group-data-[state=active]:to-gray-200' : ''}
                 dark:from-gray-300 dark:to-gray-100
-              `}>{model.label}</span>
+              `}>
+                <span className="hidden md:inline">{model.label}</span>
+                <span className="md:hidden">{model.shortLabel}</span>
+              </span>
               <div className={`absolute inset-0 opacity-0 group-data-[state=active]:opacity-100 transition-opacity -z-0 bg-gradient-to-br
                 ${model.id === 'ASR' ? 'from-blue-500 to-blue-600' : ''}
                 ${model.id === 'NMT' ? 'from-emerald-500 to-emerald-600' : ''}

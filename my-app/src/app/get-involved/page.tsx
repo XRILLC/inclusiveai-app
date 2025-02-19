@@ -16,7 +16,7 @@ export default function GetInvolvedPage() {
           rel="noopener noreferrer"
           className="text-lg text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-emerald-600 hover:to-sky-600 hover:bg-clip-text hover:text-transparent transition-all"
         >
-          Follow this link to connect
+          Follow this <span className="underline">link</span> to connect
         </a>
       </div>
     </div>

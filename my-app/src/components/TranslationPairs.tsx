@@ -116,12 +116,29 @@ export default function TranslationPairs({ languageId }: Props) {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="target_language"
-                angle={-45}
-                textAnchor="end"
-                height={60}
+                tick={false}
+                height={20}
               />
               <YAxis />
-              <Tooltip />
+              <Tooltip 
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload;
+                    return (
+                      <div className="bg-gray-900/95 border border-gray-800 p-3 rounded-lg shadow-lg">
+                        <p className="text-gray-300 mb-2">
+                          <span className="font-semibold">{data.source_language}</span>
+                          {' → '}
+                          <span className="font-semibold">{data.target_language}</span>
+                        </p>
+                        <p className="text-violet-300">chrF++ Score: {data.chrf_score.toFixed(2)}</p>
+                        <p className="text-green-300">BLEU Score: {data.bleu_score.toFixed(2)}</p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
               <Legend />
               <Bar dataKey="chrf_score" name="chrF++ Score" fill="#8884d8" />
               <Bar dataKey="bleu_score" name="BLEU Score" fill="#82ca9d" />
