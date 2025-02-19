@@ -28,16 +28,20 @@ export async function GET(
 
     const query = `
       SELECT 
-        nps.chrf_plus as chrf_score,
-        nps.spbleu_spm_200 as bleu_score,
+        nps.chrf_plus AS chrf_score,
+        nps.spbleu_spm_200 AS bleu_score,
         source_lang.language_name AS source_lang_name,
         target_lang.language_name AS target_lang_name,
         source_lang.id AS source_lang_id,
         target_lang.id AS target_lang_id,
         CASE 
+          WHEN source_lang.id = $1 THEN target_lang.language_name
+          ELSE source_lang.language_name
+        END AS paired_language,
+        CASE 
           WHEN source_lang.id = $1 THEN 'Source'
           ELSE 'Target'
-        END as role
+        END AS role
       FROM 
         nmt_pairs_source nps
       LEFT JOIN 
@@ -51,7 +55,7 @@ export async function GET(
       WHERE 
         nps.source_lang_id IS NOT NULL
         AND nps.target_lang_id IS NOT NULL
-        AND (source_lang.id = $1 OR target_lang.id = $1)
+        AND ($1 IN (source_lang.id, target_lang.id))
       ORDER BY 
         role, nps.chrf_plus DESC NULLS LAST
     `;

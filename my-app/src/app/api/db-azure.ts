@@ -53,17 +53,17 @@ export async function loadLanguageData(modelType?: string): Promise<Language[]> 
       SELECT 
         id,
         language_name,
-        iso_639_3,
         coordinates,
-        ROUND(CAST(ST_Y(coordinates::geometry) as numeric), 6) as latitude,
-        ROUND(CAST(ST_X(coordinates::geometry) as numeric), 6) as longitude,
         asr,
         nmt,
-        nmt_type,
-        tts
+        tts,
+        ROUND(CAST(ST_Y(coordinates::geometry) as numeric), 6) as latitude,
+        ROUND(CAST(ST_X(coordinates::geometry) as numeric), 6) as longitude
       FROM language_new
-      WHERE (tts IS true OR asr IS true OR nmt IS true)
-        AND coordinates IS NOT NULL
+      WHERE coordinates IS NOT NULL
+        AND ST_IsValid(coordinates::geometry)
+        AND ST_X(coordinates::geometry) BETWEEN -180 AND 180
+        AND ST_Y(coordinates::geometry) BETWEEN -90 AND 90
     `;
 
     if (modelType) {
