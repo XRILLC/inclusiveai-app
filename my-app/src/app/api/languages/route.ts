@@ -11,9 +11,11 @@ interface Language {
   longitude: number;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const modelType = searchParams.get('model');
   try {
-    const languages = await loadLanguageData();
+    const languages = await loadLanguageData(modelType || undefined);
     
     // Transform the data to match the expected format
     const transformedLanguages = (languages as Language[]).map(lang => {

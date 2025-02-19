@@ -12,7 +12,7 @@ const Map = dynamic(() => import("../components/Map"), {
 });
 
 export default function Home() {
-  const [selectedModels, setSelectedModels] = useState<string[]>([]);
+  const [selectedModels, setSelectedModels] = useState<string[]>(['ASR']);
   const [activeProgressTab, setActiveProgressTab] = useState<'languages' | 'population'>('languages');
   const [languages, setLanguages] = useState<LanguageData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +21,9 @@ export default function Home() {
   useEffect(() => {
     const fetchLanguages = async () => {
       try {
-        const response = await fetch('/api/languages');
+        const model = selectedModels.length === 1 ? selectedModels[0] : null;
+        const url = model ? `/api/languages?model=${model}` : '/api/languages';
+        const response = await fetch(url);
         if (!response.ok) {
           throw new Error('Failed to fetch languages');
         }
@@ -35,7 +37,7 @@ export default function Home() {
     };
 
     fetchLanguages();
-  }, []);
+  }, [selectedModels]);
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
@@ -54,21 +56,22 @@ export default function Home() {
   };
 
   return (
-    <main className="p-4">
-      <div className="container mx-auto space-y-8">
+    <main className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
+      <div className="container mx-auto px-4 py-8">
         <Stats {...stats} />
-        <BridgingProgressBar
-          progress={46}
-          activeTab={activeProgressTab}
-          onTabChange={setActiveProgressTab}
-        />
-        <div className="grid grid-cols-4 gap-4">
-          <div className="space-y-4">
-            <ModelFilters onFilterChange={setSelectedModels} />
-          </div>
-          <div className="col-span-3 rounded-lg border border-gray-200 shadow-sm h-[600px] bg-white">
-            <Map languages={languages} selectedModels={selectedModels} />
-          </div>
+
+        <div className="mt-12 mb-16">
+          <BridgingProgressBar
+            progress={46}
+            activeTab={activeProgressTab}
+            onTabChange={setActiveProgressTab}
+          />
+        </div>
+
+        <ModelFilters onFilterChange={setSelectedModels} />
+
+        <div className="rounded-xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 h-[600px]">
+          <Map languages={languages} selectedModels={selectedModels} />
         </div>
       </div>
     </main>

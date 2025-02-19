@@ -27,8 +27,8 @@ interface Language {
   longitude: number;
 }
 
-export async function loadLanguageData(): Promise<Language[]> {
-  const queryText = `
+export async function loadLanguageData(modelType?: string): Promise<Language[]> {
+  let queryText = `
     SELECT 
       id,
       language_name,
@@ -43,8 +43,14 @@ export async function loadLanguageData(): Promise<Language[]> {
       AND ST_IsValid(coordinates::geometry)
       AND ST_X(coordinates::geometry) BETWEEN -180 AND 180
       AND ST_Y(coordinates::geometry) BETWEEN -90 AND 90
-    ORDER BY language_name
   `;
+
+  if (modelType) {
+    const modelColumn = modelType.toLowerCase();
+    queryText += ` AND ${modelColumn} = true`;
+  }
+
+  queryText += ` ORDER BY language_name`;
 
   try {
     const result = await sql.unsafe(queryText);

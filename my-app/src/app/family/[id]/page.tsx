@@ -73,27 +73,46 @@ export default function FamilyPage({
   }
 
   return (
-    <main className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-white">Languages in Family: {familyName}</h1>
-        <Link
-          href="/"
-          className="px-4 py-2 text-gray-300 hover:text-white flex items-center gap-2"
-        >
-          ← Back to Map
-        </Link>
-      </div>
-
-      <div className="space-y-2">
-        {languages.map((language) => (
+    <main className="container mx-auto p-6 bg-gradient-to-b from-gray-800/20 to-gray-900/20 min-h-screen">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-cyan-300">
+              {familyName}
+            </h1>
+            <p className="text-blue-300/70 mt-2 text-lg">Language Family</p>
+          </div>
           <Link
-            key={language.id}
-            href={`/language/${language.id}`}
-            className="block text-blue-400 hover:text-blue-300 hover:underline"
+            href="/"
+            className="px-4 py-2 text-blue-300 hover:text-blue-200 flex items-center gap-2 rounded-lg hover:bg-blue-900/30 transition-colors"
           >
-            • {language.name}
+            ← Back to Map
           </Link>
-        ))}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {languages.map((language) => (
+            <Link
+              key={language.id}
+              href={`/language/${language.id}`}
+              className="group p-4 rounded-lg bg-blue-950/10 hover:bg-blue-900/20 transition-all duration-200 border border-blue-900/20 hover:border-blue-800/30 backdrop-blur-sm"
+            >
+              <div className="flex items-start space-x-3">
+                <div className="flex-1">
+                  <h3 className="text-lg font-medium text-blue-100 group-hover:text-blue-300 transition-colors">
+                    {language.name}
+                  </h3>
+                  {language.iso_code && (
+                    <p className="text-sm text-blue-300/60 mt-1">
+                      ISO: {language.iso_code}
+                    </p>
+                  )}
+                </div>
+                <span className="text-gray-500 group-hover:text-gray-400 transition-colors">→</span>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </main>
   );

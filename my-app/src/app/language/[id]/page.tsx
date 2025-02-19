@@ -6,39 +6,17 @@ import Link from "next/link";
 import TranslationPairs from "../../../components/TranslationPairs";
 import ProgressBar from "../../../components/ProgressBar";
 import { LanguageData } from "@/types";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
-interface TabProps {
-  label: string;
-  isActive: boolean;
-  onClick: () => void;
-}
-
-function Tab({ label, isActive, onClick }: TabProps) {
-  return (
-    <button
-      className={`px-4 py-2 ${
-        isActive
-          ? "text-blue-600 border-b-2 border-blue-600 font-medium"
-          : "text-gray-500 hover:text-gray-700"
-      }`}
-      onClick={onClick}
-    >
-      {label}
-    </button>
-  );
-}
 
 function ModelAvailabilityBadge({ isAvailable }: { isAvailable: boolean }) {
   return (
-    <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${
-        isAvailable 
-          ? 'bg-blue-900 text-blue-100'
-          : 'bg-gray-700 text-gray-300'
-      }`}
-    >
+    <Badge variant={isAvailable ? "default" : "secondary"} className="text-sm">
       {isAvailable ? '✓ Available' : '✗ Not Available'}
-    </span>
+    </Badge>
   );
 }
 
@@ -48,7 +26,6 @@ export default function LanguageDetails({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = use(params);
-  const [activeTab, setActiveTab] = useState("overview");
   const [language, setLanguage] = useState<LanguageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +56,7 @@ export default function LanguageDetails({
       <div className="container mx-auto p-4 flex justify-center items-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading language details...</p>
+          <p className="text-gray-400">Loading language details...</p>
         </div>
       </div>
     );
@@ -88,37 +65,28 @@ export default function LanguageDetails({
   if (error || !language) {
     return (
       <div className="container mx-auto p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-          <p className="text-red-600">{error || 'Language not found'}</p>
-          <Link href="/" className="text-blue-600 hover:underline mt-4 inline-block">
-            ← Back to Map
-          </Link>
-        </div>
+        <Card className="bg-red-950/20 border-red-900">
+          <CardContent className="pt-6">
+            <p className="text-red-400 text-center">{error || 'Language not found'}</p>
+            <Link href="/" className="text-blue-400 hover:text-blue-300 hover:underline mt-4 block text-center">
+              ← Back to Map
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     );
   }
-
-  const tabs = [
-    { id: "overview", label: "Overview" },
-    { id: "technology", label: "Language Technology" },
-    { id: "pairs", label: "Translation Pairs" },
-  ];
 
   // Calculate progress based on available models and translation pairs
   const calculateProgress = () => {
     let score = 0;
     const maxScore = 100;
 
-    // Base score for having coordinates
     if (language.latitude && language.longitude) score += 10;
-
-    // Score for each available model
     const availableModels = language.available_models?.filter(Boolean) || [];
     score += availableModels.length * 15;
-
-    // Score for translation pairs
     const translationPairCount = language.nmt_pair_count || 0;
-    score += Math.min(translationPairCount * 5, 40); // Cap at 40%
+    score += Math.min(translationPairCount * 5, 40);
 
     return Math.min(Math.round((score / maxScore) * 100), 100);
   };
@@ -126,119 +94,178 @@ export default function LanguageDetails({
   const progress = calculateProgress();
 
   return (
-    <main className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold text-white">{language.name || "Amharic"}</h1>
+    <main className="container mx-auto p-6 space-y-8 bg-gradient-to-b from-gray-800/20 to-gray-900/20 min-h-screen">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-cyan-300">
+            {language.name}
+          </h1>
+          <p className="text-blue-300/70 mt-1 text-lg">Language Profile</p>
+        </div>
         <Link
           href="/"
-          className="px-4 py-2 text-gray-300 hover:text-white flex items-center gap-2"
+          className="px-4 py-2 text-blue-300 hover:text-blue-200 flex items-center gap-2 rounded-lg hover:bg-blue-900/30 transition-colors"
         >
           ← Back to Map
         </Link>
       </div>
 
-      {/* Progress Bar */}
-      <div className="mb-6 w-full max-w-xl">
-        <ProgressBar progress={progress} />
-      </div>
+      <Card className="border-blue-900/20 bg-blue-950/10 backdrop-blur-sm shadow-lg hover:bg-blue-900/20 transition-colors">
+        <CardContent className="pt-6">
+          <ProgressBar progress={progress} />
+          <p className="text-base text-blue-300/70 mt-2 text-center font-medium">
+            {progress}% Progress towards full language support
+          </p>
+        </CardContent>
+      </Card>
 
-      <div className="border-b border-gray-700 mb-6">
-        <div className="flex gap-4">
-          {tabs.map((tab) => (
-            <Tab
-              key={tab.id}
-              label={tab.label}
-              isActive={activeTab === tab.id}
-              onClick={() => setActiveTab(tab.id)}
-            />
-          ))}
+      <Tabs defaultValue="overview" className="w-full">
+        <div className="bg-gradient-to-r from-blue-900/30 to-cyan-900/30 rounded-lg p-2">
+          <TabsList className="w-full h-14 bg-transparent gap-1">
+            <TabsTrigger 
+              value="overview" 
+              className="text-lg px-8 py-3 rounded-md data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-200 transition-all h-full"
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger 
+              value="technology" 
+              className="text-lg px-8 py-3 rounded-md data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-200 transition-all h-full"
+            >
+              Language Technology
+            </TabsTrigger>
+            <TabsTrigger 
+              value="pairs" 
+              className="text-lg px-8 py-3 rounded-md data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-200 transition-all h-full"
+            >
+              Translation Pairs
+            </TabsTrigger>
+          </TabsList>
         </div>
-      </div>
 
-      {activeTab === "overview" && (
-        <div className="grid grid-cols-1 gap-6">
-          {/* Location Card */}
-          <div className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-6 border border-gray-800">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-gray-400">🌍</span>
-              <h3 className="text-gray-400 text-sm font-medium">Location and Geography</h3>
-            </div>
-            {language.latitude && language.longitude && (
-              <p className="text-gray-300 text-sm">
-                <span className="text-gray-400">Coordinates:</span>{" "}
-                <span>({language.latitude.toFixed(2)}, {language.longitude.toFixed(2)})</span>
-              </p>
-            )}
-          </div>
+        <TabsContent value="overview" className="space-y-6 mt-6">
+          <Card className="border-blue-900/20 bg-blue-950/10 backdrop-blur-sm shadow-lg hover:bg-blue-900/20 transition-colors">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <span className="text-gray-400">🌍</span>
+                Location and Geography
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {language.latitude && language.longitude ? (
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-gray-300 text-lg px-4 py-2">
+                    {language.latitude.toFixed(2)}°N, {language.longitude.toFixed(2)}°E
+                  </Badge>
+                </div>
+              ) : (
+                <p className="text-gray-500 italic">Location data not available</p>
+              )}
+            </CardContent>
+          </Card>
 
-          {/* Classification Card */}
-          <div className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-6 border border-gray-800">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-gray-400">🏷️</span>
-              <h3 className="text-gray-400 text-sm font-medium">Classification and Identifiers</h3>
-            </div>
-            <div className="space-y-2">
+          <Card className="border-blue-900/20 bg-blue-950/10 backdrop-blur-sm shadow-lg hover:bg-blue-900/20 transition-colors">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <span className="text-gray-400">🏷️</span>
+                Classification and Identifiers
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               {language.family_name && (
-                <p className="text-gray-300 text-sm">
-                  <span className="text-gray-400">Family:</span>{" "}
-                  <Link 
-                    href={`/family/${language.family_id}`}
-                    className="text-blue-400 hover:text-blue-300 hover:underline"
-                  >
-                    {language.family_name}
-                  </Link>
-                </p>
+                <HoverCard>
+                  <HoverCardTrigger asChild>
+                    <Link 
+                      href={`/family/${language.family_id}`}
+                      className="block p-4 rounded-lg bg-gray-800/30 hover:bg-gray-700/50 transition-colors"
+                    >
+                      <span className="text-gray-400">Family</span>
+                      <p className="text-blue-400 mt-1">{language.family_name}</p>
+                    </Link>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-80 bg-gray-900/95 border-gray-800">
+                    <p className="text-sm text-gray-400">
+                      Click to view all languages in the {language.family_name} family
+                    </p>
+                  </HoverCardContent>
+                </HoverCard>
               )}
+
               {language.subfamily_name && (
-                <p className="text-gray-300 text-sm">
-                  <span className="text-gray-400">Subfamily:</span>{" "}
-                  <Link 
-                    href={`/subfamily/${language.subfamily_id}`}
-                    className="text-blue-400 hover:text-blue-300 hover:underline"
-                  >
-                    {language.subfamily_name}
-                  </Link>
-                </p>
+                <HoverCard>
+                  <HoverCardTrigger asChild>
+                    <Link 
+                      href={`/subfamily/${language.subfamily_id}`}
+                      className="block p-4 rounded-lg bg-gray-800/30 hover:bg-gray-700/50 transition-colors"
+                    >
+                      <span className="text-gray-400">Subfamily</span>
+                      <p className="text-blue-400 mt-1">{language.subfamily_name}</p>
+                    </Link>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-80 bg-gray-900/95 border-gray-800">
+                    <p className="text-sm text-gray-400">
+                      Click to view all languages in the {language.subfamily_name} subfamily
+                    </p>
+                  </HoverCardContent>
+                </HoverCard>
               )}
-              {language.iso_code && (
-                <p className="text-gray-300 text-sm">
-                  <span className="text-gray-400">ISO Code:</span>{" "}
-                  <span>{language.iso_code}</span>
-                </p>
-              )}
-              {language.glottocode && (
-                <p className="text-gray-300 text-sm">
-                  <span className="text-gray-400">Glotto Code:</span>{" "}
-                  <span>{language.glottocode}</span>
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
-      {activeTab === "technology" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="p-6 bg-gray-900 rounded-lg border border-gray-700">
-            <h3 className="text-lg font-medium mb-4 text-gray-300">Speech Recognition (ASR)</h3>
-            <ModelAvailabilityBadge isAvailable={language.available_models?.includes('ASR')} />
-          </div>
-          
-          <div className="p-6 bg-gray-900 rounded-lg border border-gray-700">
-            <h3 className="text-lg font-medium mb-4 text-gray-300">Machine Translation (NMT)</h3>
-            <ModelAvailabilityBadge isAvailable={language.available_models?.includes('NMT')} />
-          </div>
-          
-          <div className="p-6 bg-gray-900 rounded-lg border border-gray-700">
-            <h3 className="text-lg font-medium mb-4 text-gray-300">Text-to-Speech (TTS)</h3>
-            <ModelAvailabilityBadge isAvailable={language.available_models?.includes('TTS')} />
-          </div>
-        </div>
-      )}
+              <div className="grid grid-cols-2 gap-4">
+                {language.iso_code && (
+                  <div className="p-3 rounded-lg bg-gray-800/50">
+                    <span className="text-gray-400">ISO Code</span>
+                    <p className="text-white mt-1 font-mono">{language.iso_code}</p>
+                  </div>
+                )}
+                {language.glottocode && (
+                  <div className="p-3 rounded-lg bg-gray-800/50">
+                    <span className="text-gray-400">Glotto Code</span>
+                    <p className="text-white mt-1 font-mono">{language.glottocode}</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {activeTab === "pairs" && (
-        <TranslationPairs languageId={resolvedParams.id} />
-      )}
+        <TabsContent value="technology" className="mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="border-blue-900/20 bg-blue-950/10 backdrop-blur-sm shadow-lg hover:bg-blue-900/20 transition-colors">
+              <CardHeader>
+                <CardTitle>Speech Recognition</CardTitle>
+                <CardDescription>Automatic Speech Recognition (ASR)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ModelAvailabilityBadge isAvailable={language.available_models?.includes('ASR')} />
+              </CardContent>
+            </Card>
+            
+            <Card className="border-blue-900/20 bg-blue-950/10 backdrop-blur-sm shadow-lg hover:bg-blue-900/20 transition-colors">
+              <CardHeader>
+                <CardTitle>Machine Translation</CardTitle>
+                <CardDescription>Neural Machine Translation (NMT)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ModelAvailabilityBadge isAvailable={language.available_models?.includes('NMT')} />
+              </CardContent>
+            </Card>
+            
+            <Card className="border-blue-900/20 bg-blue-950/10 backdrop-blur-sm shadow-lg hover:bg-blue-900/20 transition-colors">
+              <CardHeader>
+                <CardTitle>Text to Speech</CardTitle>
+                <CardDescription>Text-to-Speech Synthesis (TTS)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ModelAvailabilityBadge isAvailable={language.available_models?.includes('TTS')} />
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="pairs" className="mt-6">
+          <TranslationPairs languageId={resolvedParams.id} />
+        </TabsContent>
+      </Tabs>
     </main>
   );
 }

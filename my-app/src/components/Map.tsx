@@ -6,11 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import { LanguageData } from '@/types';
 import { useRouter } from 'next/navigation';
 
-const MODEL_COLORS: Record<string, string> = {
-  ASR: '#FF4B4B',
-  NMT: '#4CAF50',
-  TTS: '#2196F3'
-};
+
 
 interface MapProps {
   languages: LanguageData[];
@@ -28,8 +24,10 @@ export default function Map({ languages, selectedModels }: MapProps) {
         center: [20, 0],
         zoom: 2,
         layers: [
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: ' OpenStreetMap contributors'
+          L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
           })
         ]
       });
@@ -65,20 +63,35 @@ export default function Map({ languages, selectedModels }: MapProps) {
 
       // Create popup content with View Details button
       const popupContent = `
-        <div class="min-w-[200px] p-4">
-          <h3 class="text-lg font-semibold mb-2">${language.name}</h3>
-          <p class="mb-2"><strong>ISO Code:</strong> ${language.iso_code}</p>
+        <div class="min-w-[280px] p-5 bg-gray-900/95 backdrop-blur-sm text-white rounded-lg shadow-xl">
+          <h3 class="text-xl font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">${language.name}</h3>
+          <p class="text-sm text-gray-400 mb-4">ISO Code: ${language.iso_code || 'undefined'}</p>
+          
           ${modelsPresent.length > 0 ? `
-            <p class="mb-2"><strong>Available Models:</strong></p>
-            <div class="flex gap-2 mb-2">
-              ${modelsPresent.map(model => `
-                <span class="px-2 py-1 rounded-full text-white text-xs" style="background-color: ${MODEL_COLORS[model]}">${model}</span>
-              `).join('')}
+            <div class="space-y-3 mb-4">
+              <div class="flex gap-2">
+                ${modelsPresent.map(model => `
+                  <span class="px-3 py-1 rounded-full text-white text-xs font-medium bg-gradient-to-r ${model === 'ASR' ? 'from-rose-500 to-rose-600' : model === 'NMT' ? 'from-blue-500 to-blue-600' : 'from-green-500 to-green-600'}">
+                    ${model}
+                  </span>
+                `).join('')}
+              </div>
+              <div class="flex items-center gap-2 text-sm">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                </svg>
+                <span class="text-gray-300">${language.nmt_pair_count || 0} NMT Pairs</span>
+              </div>
             </div>
-          ` : ''}
-          <p class="mb-4"><strong>NMT Pairs:</strong> ${language.nmt_pair_count || 0}</p>
+          ` : `
+            <p class="text-sm text-gray-400 mb-4">No models available yet</p>
+          `}
+          
           <button
-            class="view-details-btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm w-full transition-colors"
+            class="view-details-btn w-full px-4 py-2.5 rounded-lg font-medium text-sm
+            bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600
+            transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]
+            focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-2 focus:ring-offset-gray-900"
             data-language-id="${language.id}"
           >
             View Details
@@ -108,20 +121,30 @@ export default function Map({ languages, selectedModels }: MapProps) {
             const line = L.polyline(
               [[language.latitude, language.longitude], coords],
               {
-                color: MODEL_COLORS.NMT,
-                weight: 1,
-                opacity: 0.5
+                color: '#60A5FA',
+                weight: 1.5,
+                opacity: 0.4,
+                dashArray: '6, 8',
+                className: 'nmt-line'
               }
             ).addTo(mapRef.current!);
 
+
+
             // Add popup to line
             const pairPopup = `
-              <div class="min-w-[200px] p-4">
-                <h4 class="text-lg font-semibold mb-2">Translation Pair</h4>
-                <p class="mb-2">
-                  <strong>Source:</strong> ${language.name}<br>
-                  <strong>Target:</strong> ${language.connected_languages?.[index]?.name || 'Unknown'}
-                </p>
+              <div class="min-w-[240px] p-5 bg-gray-900/95 backdrop-blur-sm text-white rounded-lg shadow-xl">
+                <h4 class="text-lg font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400">Translation Pair</h4>
+                <div class="mt-4 space-y-3">
+                  <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-gradient-to-r from-indigo-400 to-cyan-400"></div>
+                    <span class="text-sm text-gray-300">${language.name}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-gradient-to-r from-indigo-400 to-cyan-400"></div>
+                    <span class="text-sm text-gray-300">${language.connected_languages?.[index]?.name || 'Unknown'}</span>
+                  </div>
+                </div>
               </div>
             `;
             line.bindPopup(pairPopup);
@@ -142,26 +165,53 @@ export default function Map({ languages, selectedModels }: MapProps) {
 }
 
 function createMarkerHtml(models: string[]): string {
+  const getGradient = (model: string) => {
+    switch(model) {
+      case 'ASR':
+        return 'from-rose-500 to-rose-600';
+      case 'NMT':
+        return 'from-blue-500 to-blue-600';
+      case 'TTS':
+        return 'from-green-500 to-green-600';
+      default:
+        return 'from-gray-500 to-gray-600';
+    }
+  };
+
   if (models.length === 0) {
     return `
-      <div class="w-6 h-6 rounded-full bg-gray-400 opacity-40 border-2 border-white"></div>
+      <div class="w-6 h-6 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center">
+        <div class="w-1.5 h-1.5 rounded-full bg-white/30"></div>
+      </div>
     `;
   }
 
   if (models.length === 1) {
     return `
-      <div class="w-6 h-6 rounded-full opacity-80 border-2 border-white" style="background-color: ${MODEL_COLORS[models[0]]}"></div>
+      <div class="w-6 h-6 rounded-full bg-gradient-to-br ${getGradient(models[0])} flex items-center justify-center">
+        <div class="w-1.5 h-1.5 rounded-full bg-white/30"></div>
+      </div>
     `;
   }
 
+  // For multiple models, create a segmented circle
   const segmentSize = 360 / models.length;
-  const conicGradient = models.map((model, index) => {
-    const startAngle = index * segmentSize;
-    const endAngle = startAngle + segmentSize;
-    return `${MODEL_COLORS[model]} ${startAngle}deg ${endAngle}deg`;
-  }).join(', ');
+  const segments = models.map((model, i) => {
+    const rotation = i * segmentSize;
+    return `
+      <div 
+        class="absolute inset-0 bg-gradient-to-br ${getGradient(model)}"
+        style="clip-path: polygon(50% 50%, ${50 + 50 * Math.cos((rotation - 2) * Math.PI / 180)}% ${50 + 50 * Math.sin((rotation - 2) * Math.PI / 180)}%, ${50 + 50 * Math.cos((rotation + segmentSize + 2) * Math.PI / 180)}% ${50 + 50 * Math.sin((rotation + segmentSize + 2) * Math.PI / 180)}%, 50% 50%)"
+      ></div>
+    `;
+  }).join('');
 
   return `
-    <div class="w-6 h-6 rounded-full opacity-80 border-2 border-white" style="background: conic-gradient(${conicGradient})"></div>
+    <div class="relative w-6 h-6 rounded-full overflow-hidden flex items-center justify-center">
+      ${segments}
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div class="w-1.5 h-1.5 rounded-full bg-white/30"></div>
+      </div>
+    </div>
   `;
 }

@@ -1,42 +1,54 @@
 "use client";
 
+import { useState } from 'react';
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// import { Button } from "@/components/ui/button";
+
 interface ModelFiltersProps {
   onFilterChange: (selectedModels: string[]) => void;
 }
 
 export function ModelFilters({ onFilterChange }: ModelFiltersProps) {
+  const [activeTab, setActiveTab] = useState<string>("ASR");
+  
   const modelTypes = [
-    { id: "ASR", label: "ASR", color: "rose" },
-    { id: "NMT", label: "NMT", color: "blue" },
-    { id: "TTS", label: "TTS", color: "green" },
+    { id: "all", label: "Data" },
+    { id: "ASR", label: "ASR Models" },
+    { id: "NMT", label: "NMT Models" },
+    { id: "TTS", label: "TTS Models" },
   ];
 
-  const handleCheckboxChange = () => {
-    const selectedModels = modelTypes
-      .filter((model) => {
-        const element = document.getElementById(model.id) as HTMLInputElement;
-        return element?.checked;
-      })
-      .map((model) => model.id);
-    onFilterChange(selectedModels);
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    if (value === "all") {
+      onFilterChange([]);
+    } else {
+      onFilterChange([value]);
+    }
   };
 
   return (
-    <div className="p-4 rounded-lg bg-white shadow-sm">
-      <h3 className="text-sm font-medium text-gray-500 mb-4">Model Types</h3>
-      <div className="space-y-2">
-        {modelTypes.map((model) => (
-          <label key={model.id} className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id={model.id}
-              className={`h-4 w-4 rounded border-gray-300 text-${model.color}-600 focus:ring-${model.color}-600`}
-              onChange={handleCheckboxChange}
-            />
-            <span className="text-sm text-gray-700">{model.label}</span>
-          </label>
-        ))}
-      </div>
+    <div className="w-full flex justify-center mb-8">
+      <Tabs
+        value={activeTab}
+        onValueChange={handleTabChange}
+        className="w-full max-w-3xl"
+      >
+        <TabsList className="grid w-full grid-cols-4 h-14 bg-white/10 backdrop-blur-sm">
+          {modelTypes.map((model) => (
+            <TabsTrigger
+              key={model.id}
+              value={model.id}
+              className={`text-base font-medium transition-all
+                data-[state=active]:bg-primary data-[state=active]:text-primary-foreground
+                ${activeTab === model.id ? 'bg-indigo-600 text-white' : 'hover:bg-white/20'}
+              `}
+            >
+              {model.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
     </div>
   );
 }
