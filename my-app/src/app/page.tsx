@@ -6,6 +6,7 @@ import { Stats } from "../components/Stats";
 import { ModelFilters } from "../components/ModelFilters";
 import { BridgingProgressBar } from "../components/BridgingProgressBar";
 import { LanguageData } from "@/types";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const Map = dynamic(() => import("../components/Map"), {
   ssr: false,
@@ -56,8 +57,15 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
-      <div className="container mx-auto px-4 py-8">
+    <main className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-emerald-500/20 via-sky-500/30 to-blue-600/20 dark:from-emerald-900/40 dark:via-sky-900/50 dark:to-blue-900/40 text-gray-900 dark:text-white">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_100px_100px,rgba(165,243,252,0.1),transparent)] dark:bg-[radial-gradient(circle_800px_at_100px_100px,rgba(56,189,248,0.1),transparent)]"></div>
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+      <div className="container mx-auto px-8 py-8 mt-20">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">DigitalDivide.ai</h1>
+        </div>
         <Stats {...stats} />
 
         <div className="mt-12 mb-16">
@@ -70,7 +78,7 @@ export default function Home() {
 
         <ModelFilters onFilterChange={setSelectedModels} />
 
-        <div className="rounded-xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 h-[600px]">
+        <div className="rounded-xl overflow-hidden bg-white/80 dark:bg-white/5 backdrop-blur-sm border border-gray-200/50 dark:border-white/10 h-[600px]">
           <Map languages={languages} selectedModels={selectedModels} />
         </div>
       </div>

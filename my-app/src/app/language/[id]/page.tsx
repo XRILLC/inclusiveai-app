@@ -94,10 +94,10 @@ export default function LanguageDetails({
   const progress = calculateProgress();
 
   return (
-    <main className="container mx-auto p-6 space-y-8 bg-gradient-to-b from-gray-800/20 to-gray-900/20 min-h-screen">
-      <div className="flex justify-between items-center">
+    <main className="container mx-auto p-6 pt-24 space-y-8 bg-gradient-to-b from-gray-800/20 to-gray-900/20 min-h-screen">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-cyan-300">
+          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-cyan-300 break-words">
             {language.name}
           </h1>
           <p className="text-blue-300/70 mt-1 text-lg">Language Profile</p>
@@ -121,24 +121,26 @@ export default function LanguageDetails({
 
       <Tabs defaultValue="overview" className="w-full">
         <div className="bg-gradient-to-r from-blue-900/30 to-cyan-900/30 rounded-lg p-2">
-          <TabsList className="w-full h-14 bg-transparent gap-1">
+          <TabsList className="w-full h-auto bg-transparent gap-1 flex-wrap md:flex-nowrap">
             <TabsTrigger 
               value="overview" 
-              className="text-lg px-8 py-3 rounded-md data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-200 transition-all h-full"
+              className="text-sm md:text-base px-3 md:px-6 py-2 md:py-3 rounded-md data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-200 transition-all flex-1 min-w-[100px]"
             >
               Overview
             </TabsTrigger>
             <TabsTrigger 
               value="technology" 
-              className="text-lg px-8 py-3 rounded-md data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-200 transition-all h-full"
+              className="text-sm md:text-base px-3 md:px-6 py-2 md:py-3 rounded-md data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-200 transition-all flex-1 min-w-[100px]"
             >
-              Language Technology
+              <span className="hidden md:inline">Language Technology</span>
+              <span className="md:hidden">Tech</span>
             </TabsTrigger>
             <TabsTrigger 
               value="pairs" 
-              className="text-lg px-8 py-3 rounded-md data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-200 transition-all h-full"
+              className="text-sm md:text-base px-3 md:px-6 py-2 md:py-3 rounded-md data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-200 transition-all flex-1 min-w-[100px]"
             >
-              Translation Pairs
+              <span className="hidden md:inline">Translation Pairs</span>
+              <span className="md:hidden">Pairs</span>
             </TabsTrigger>
           </TabsList>
         </div>

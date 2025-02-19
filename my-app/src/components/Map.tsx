@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from 'react';
+import { useTheme } from 'next-themes';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { LanguageData } from '@/types';
@@ -16,20 +17,26 @@ interface MapProps {
 export default function Map({ languages, selectedModels }: MapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const router = useRouter();
+  const { theme } = useTheme();
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
 
   useEffect(() => {
     if (!mapRef.current) {
       // Initialize map
+      const tileUrl = theme === 'dark' 
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+        : 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png';
+
+      tileLayerRef.current = L.tileLayer(tileUrl, {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        subdomains: 'abcd',
+        maxZoom: 20
+      });
+
       mapRef.current = L.map('map', {
         center: [20, 0],
         zoom: 2,
-        layers: [
-          L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd',
-            maxZoom: 20
-          })
-        ]
+        layers: [tileLayerRef.current]
       });
     }
 
@@ -63,9 +70,9 @@ export default function Map({ languages, selectedModels }: MapProps) {
 
       // Create popup content with View Details button
       const popupContent = `
-        <div class="min-w-[280px] p-5 bg-gray-900/95 backdrop-blur-sm text-white rounded-lg shadow-xl">
+        <div class="min-w-[280px] p-5 ${theme === 'dark' ? 'bg-gray-900/95 text-white' : 'bg-white/95 text-gray-900'} backdrop-blur-sm rounded-lg shadow-xl">
           <h3 class="text-xl font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">${language.name}</h3>
-          <p class="text-sm text-gray-400 mb-4">ISO Code: ${language.iso_code || 'undefined'}</p>
+          <p class="text-sm text-black-400 mb-4">ISO Code: ${language.iso_code || 'undefined'}</p>
           
           ${modelsPresent.length > 0 ? `
             <div class="space-y-3 mb-4">
@@ -80,7 +87,7 @@ export default function Map({ languages, selectedModels }: MapProps) {
                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                 </svg>
-                <span class="text-gray-300">${language.nmt_pair_count || 0} NMT Pairs</span>
+                <span class="text-black-300">${language.nmt_pair_count || 0} NMT Pairs</span>
               </div>
             </div>
           ` : `
@@ -159,7 +166,7 @@ export default function Map({ languages, selectedModels }: MapProps) {
         mapRef.current = null;
       }
     };
-  }, [languages, selectedModels, router]);
+  }, [languages, selectedModels, router, theme]);
 
   return <div id="map" className="w-full h-full" />;
 }

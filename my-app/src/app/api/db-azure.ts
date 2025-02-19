@@ -1,19 +1,39 @@
 import postgres from 'postgres';
 
-const sql = postgres({
-  host: process.env.AZURE_PGHOST,
-  port: parseInt(process.env.AZURE_PGPORT || '5432'),
-  database: process.env.AZURE_PGDATABASE,
-  username: process.env.AZURE_PGUSER,
-  password: process.env.AZURE_PGPASSWORD,
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
+// Create a single, reusable connection pool
+let sql: ReturnType<typeof postgres> | null = null;
 
-export async function query(text: string, params?: (string | number | boolean | Date)[]) {
-  const result = await sql.unsafe(text, params);
-  return result;
+function getConnection() {
+  if (!sql) {
+    sql = postgres({
+      host: process.env.AZURE_PGHOST,
+      port: parseInt(process.env.AZURE_PGPORT || '5432'),
+      database: process.env.AZURE_PGDATABASE,
+      username: process.env.AZURE_PGUSER,
+      password: process.env.AZURE_PGPASSWORD,
+      ssl: {
+        rejectUnauthorized: false
+      },
+      max: 3,
+      idle_timeout: 10,
+      connect_timeout: 10,
+      debug: false
+    });
+  }
+  return sql;
+}
+
+export async function query(text: string, params?: (string | number | boolean | Date | null)[]) {
+  const connection = getConnection();
+  try {
+    return await connection.unsafe(text, params);
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('remaining connection slots')) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return query(text, params);
+    }
+    throw error;
+  }
 }
 
 interface Language {
@@ -28,32 +48,32 @@ interface Language {
 }
 
 export async function loadLanguageData(modelType?: string): Promise<Language[]> {
-  let queryText = `
-    SELECT 
-      id,
-      language_name,
-      coordinates,
-      asr,
-      nmt,
-      tts,
-      ROUND(CAST(ST_Y(coordinates::geometry) as numeric), 6) as latitude,
-      ROUND(CAST(ST_X(coordinates::geometry) as numeric), 6) as longitude
-    FROM language_new
-    WHERE coordinates IS NOT NULL
-      AND ST_IsValid(coordinates::geometry)
-      AND ST_X(coordinates::geometry) BETWEEN -180 AND 180
-      AND ST_Y(coordinates::geometry) BETWEEN -90 AND 90
-  `;
-
-  if (modelType) {
-    const modelColumn = modelType.toLowerCase();
-    queryText += ` AND ${modelColumn} = true`;
-  }
-
-  queryText += ` ORDER BY language_name`;
-
   try {
-    const result = await sql.unsafe(queryText);
+    let queryText = `
+      SELECT 
+        id,
+        language_name,
+        iso_639_3,
+        coordinates,
+        ROUND(CAST(ST_Y(coordinates::geometry) as numeric), 6) as latitude,
+        ROUND(CAST(ST_X(coordinates::geometry) as numeric), 6) as longitude,
+        asr,
+        nmt,
+        nmt_type,
+        tts
+      FROM language_new
+      WHERE (tts IS true OR asr IS true OR nmt IS true)
+        AND coordinates IS NOT NULL
+    `;
+
+    if (modelType) {
+      const modelColumn = modelType.toLowerCase();
+      queryText += ` AND ${modelColumn} = true`;
+    }
+
+    queryText += ` ORDER BY language_name`;
+
+    const result = await query(queryText);
     return result.map(row => ({
       id: Number(row.id),
       language_name: String(row.language_name),

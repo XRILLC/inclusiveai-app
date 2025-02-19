@@ -73,11 +73,11 @@ export default function FamilyPage({
   }
 
   return (
-    <main className="container mx-auto p-6 bg-gradient-to-b from-gray-800/20 to-gray-900/20 min-h-screen">
+    <main className="container mx-auto p-6 pt-24 bg-gradient-to-b from-gray-800/20 to-gray-900/20 min-h-screen">
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-cyan-300">
+            <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-cyan-300 break-words">
               {familyName}
             </h1>
             <p className="text-blue-300/70 mt-2 text-lg">Language Family</p>
