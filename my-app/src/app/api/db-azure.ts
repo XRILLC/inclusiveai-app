@@ -55,28 +55,20 @@ export async function loadLanguageData(modelType?: string): Promise<Language[]> 
         language_name,
         iso_639_3,
         coordinates,
-        tts,
+        ROUND(CAST(ST_Y(coordinates::geometry) as numeric), 6) as latitude,
+        ROUND(CAST(ST_X(coordinates::geometry) as numeric), 6) as longitude,
         asr,
         nmt,
         nmt_type,
-        ROUND(CAST(ST_Y(coordinates::geometry) as numeric), 6) as latitude,
-        ROUND(CAST(ST_X(coordinates::geometry) as numeric), 6) as longitude
+        tts
       FROM language_new
-      WHERE coordinates IS NOT NULL
-        AND ST_IsValid(coordinates::geometry)
-        AND ST_X(coordinates::geometry) BETWEEN -180 AND 180
-        AND ST_Y(coordinates::geometry) BETWEEN -90 AND 90
+      WHERE (tts IS true OR asr IS true OR nmt IS true)
+        AND coordinates IS NOT NULL
     `;
 
-    if (modelType) {
-      // For the Data category, show all languages with any model
-      if (modelType.toLowerCase() === 'all') {
-        queryText += ` AND (tts IS true OR asr IS true OR nmt IS true)`;
-      } else {
-        // For specific model types (ASR, NMT, TTS)
-        const modelColumn = modelType.toLowerCase();
-        queryText += ` AND ${modelColumn} = true`;
-      }
+    if (modelType && modelType.toLowerCase() !== 'all') {
+      const modelColumn = modelType.toLowerCase();
+      queryText += ` AND ${modelColumn} = true`;
     }
 
     queryText += ` ORDER BY language_name`;
