@@ -39,10 +39,12 @@ export async function GET() {
         ln.language_name AS language, 
         nps.spbleu_spm_200 AS "bleu (NMT)", 
         nps.chrf_plus AS "ChrF++",
-        ln.tts
+        asr.wer as "WER (ASR)"
       FROM public.language_new ln
       LEFT JOIN public.nmt_pairs_source nps 
         ON ln.id = nps.source_lang_id
+      LEFT JOIN public.asr_source asr
+        ON asr.lang_id = nps.source_lang_id
       WHERE nps."Target" = 'eng_Latn'
       ORDER BY ln.language_name ASC;
     `;

@@ -7,7 +7,7 @@ interface Language {
   language: string;
   'bleu (NMT)': string | null;
   'ChrF++': string | null;
-  tts: boolean;
+  'WER (ASR)': number | null;
 }
 
 export default function DirectoryPage() {
@@ -29,11 +29,11 @@ export default function DirectoryPage() {
         console.log('API Response:', data);
         
         // Transform the data to match our interface
-        const transformedData = data.map((item: { language: string; 'bleu (NMT)': string | null; 'ChrF++': string | null; tts: boolean }) => ({
+        const transformedData = data.map((item: { language: string; 'bleu (NMT)': string | null; 'ChrF++': string | null; 'WER (ASR)': number | null }) => ({
           language: item.language,
           'bleu (NMT)': item['bleu (NMT)'],
           'ChrF++': item['ChrF++'],
-          tts: Boolean(item.tts)
+          'WER (ASR)': item['WER (ASR)']
         }));
         
         setLanguages(transformedData);
@@ -135,7 +135,7 @@ export default function DirectoryPage() {
                     {lang['ChrF++'] || 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                    {lang.tts ? 'Yes' : 'No'}
+                  {lang['WER (ASR)'] !== null ? `${lang['WER (ASR)']}%` : 'No'}
                   </td>
                 </tr>
               ))}
