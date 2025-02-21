@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from 'react';
-import { useTheme } from 'next-themes';
+
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { LanguageData } from '@/types';
@@ -17,15 +17,14 @@ interface MapProps {
 export default function Map({ languages, selectedModels }: MapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const router = useRouter();
-  const { theme } = useTheme();
+
   const tileLayerRef = useRef<L.TileLayer | null>(null);
 
   useEffect(() => {
     if (!mapRef.current) {
       // Initialize map
-      const tileUrl = theme === 'dark' 
-        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-        : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+      // Always use dark mode for map tiles
+      const tileUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
 
       tileLayerRef.current = L.tileLayer(tileUrl, {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -70,7 +69,7 @@ export default function Map({ languages, selectedModels }: MapProps) {
 
       // Create popup content with View Details button
       const popupContent = `
-        <div class="min-w-[280px] p-5 ${theme === 'dark' ? 'bg-gray-900/95 text-white' : 'bg-white/95 text-gray-900'} backdrop-blur-sm rounded-lg shadow-xl">
+        <div class="min-w-[280px] p-5 bg-gray-900/95 text-white backdrop-blur-sm rounded-lg shadow-xl">
           <h3 class="text-xl font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">${language.name}</h3>
           <p class="text-sm text-black-400 mb-4">ISO Code: ${language.iso_code || 'undefined'}</p>
           
@@ -166,7 +165,7 @@ export default function Map({ languages, selectedModels }: MapProps) {
         mapRef.current = null;
       }
     };
-  }, [languages, selectedModels, router, theme]);
+  }, [languages, selectedModels, router]);
 
   return <div id="map" className="w-full h-full" />;
 }
